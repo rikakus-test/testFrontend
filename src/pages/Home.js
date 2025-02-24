@@ -1,24 +1,33 @@
-import React, { Component } from "react";
+import React from 'react';
+import { Carousel, Col, Image, Row } from 'antd';
+import '../assets/image/ari.jpg';
+import '../assets/image/diven.jpg';
 import { Link } from "react-router-dom";
+const diven =   require('../assets/image/diven.jpg')
+const ari =     require('../assets/image/ari.jpg')
 
-export default class Home extends Component {
-  render() {
-    return (
-      <div
-        style={{
-          width: "100vw",
-          height: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          backgroundImage: "https://lh3.googleusercontent.com/d/1Tx4Au6bwR3sWfl-gXyuxMzjU8oB3kpaP=w1000?authuser=0"
-        }}
-      >
-        <h1 style={{ fontWeight: "bolder" }}>Hello Diven</h1>
-        <h3 style={{ fontWeight: "bold" }}>balik lu anjg</h3>
-        {/* <Link to="/">Back To Home</Link> */}
-      </div>
-    );
-  }
-}
+
+const Home = () => {
+  return (
+    <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
+            <Row gutter={0}>
+
+                  <Col>
+
+        <Image src={diven} width='30vw'></Image>
+        </Col>
+        <Col>
+
+                <h1 style={{ fontWeight: "bolder" }}>Kiri Diven --- Kanan Pak ari</h1>
+                <h3 style={{ fontWeight: "bold" }}>YHAHAHAHa</h3>
+                <Link to="/test">masuk ke test</Link>
+        </Col>
+        <Col>
+        <Image src={ari} width='30vw' ></Image>
+        </Col>
+        </Row>
+    </div>
+  );
+};
+
+export default Home;
