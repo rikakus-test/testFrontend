@@ -1,22 +1,26 @@
-import React, { useState } from 'react';
-import { Layout, Avatar, Dropdown, Menu, Card, Button, Row, Col, Switch } from 'antd';
-import { UserOutlined, SettingOutlined, EditOutlined, PoweroffOutlined, DeleteOutlined } from '@ant-design/icons';
+import React, { useEffect, useState } from 'react';
+import { Layout, Avatar, Dropdown, Menu, Card, Button, Row, Col, Switch,List } from 'antd';
+import { UserOutlined, SettingOutlined, PoweroffOutlined, PlusOutlined, HomeOutlined, LaptopOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
+import AxiosRequest from '../helper/AxiosRequest';
 
-const { Header, Content } = Layout;
+const { Header, Content, Sider } = Layout;
 
-const menu = (
+const menu = (toggleView) => (
   <Menu>
     <Menu.Item key="1">Profile</Menu.Item>
     <Menu.Item key="2">Logout</Menu.Item>
+    <Menu.Divider />
+    <Menu.Item key="3" onClick={toggleView}>
+      Toggle View
+    </Menu.Item>
   </Menu>
 );
 
 const settingMenu = (
   <Menu>
-    <Menu.Item key="1"><Button icon={<EditOutlined />}>Update</Button>
-    </Menu.Item>
-    <Menu.Item key="2"><Button icon={<DeleteOutlined />}>Delete</Button>
-    </Menu.Item>
+    <Menu.Item key="1">Option 1</Menu.Item>
+    <Menu.Item key="2">Option 2</Menu.Item>
   </Menu>
 );
 
@@ -27,47 +31,110 @@ const data = [
   { id: 4, name: 'Item 4', status: false },
 ];
 
-const Test = () => {
-  const [items, setItems] = useState(data);
+const Test = (props) => {
+  const [dataSource, setDataSource] = useState([]);
+  const navigate = useNavigate();
 
-  const toggleStatus = (id) => {
-    setItems(items.map(item => item.id === id ? { ...item, status: !item.status } : item));
+    const getData = () => {
+      // setIsLoading(true);
+      AxiosRequest.GetAxiosRequest("/items")
+        .then((res) => {
+          if (res.status === 200) {
+            setDataSource(res.data);
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        })
+        .finally(() => {
+          // setIsLoading(false);
+        });
+    };
+
+      useEffect(() => {
+        getData();
+        console.log(props)
+      }, []);
+
+  const toggleStatus = (a) => {
+    // setDataSource(dataSource.map(item => item.id === a.id ? { ...item, status: !item.status } : item));
+          AxiosRequest.PutAxiosRequest("/items/"+a.id, { ...a, status: !a.status })
+            .then((res) => {
+              console.log(res)
+
+            })
+            .catch((err) => {
+              console.log(err);
+            })
+            .finally(() => {
+              // setIsLoading(false);
+              getData();
+
+            });
   };
+  const deleteData = (id) => {
+            AxiosRequest.DeleteAxiosRequest("/items/" + id)
+              .then((res) => {
+                console.log(res)
+              })
+              .catch((err) => {
+                console.log(err);
+              })
+              .finally(() => {
+                // setIsLoading(false);
+              });
+  }
+  const testr = true
 
   return (
-    <Layout>
-      {/* Header */}
-      <Header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#001529', padding: '0 20px' }}>
-        <h2 style={{ color: 'white' }}>Dashboard</h2>
-        <Dropdown overlay={menu} placement="bottomRight">
-          <Avatar style={{ backgroundColor: '#87d068', cursor: 'pointer' }} icon={<UserOutlined />} />
-        </Dropdown>
-      </Header>
-      
-      {/* Content */}
-      <Content style={{ padding: '20px' }}>
-      <Row gutter={[16, 16]}>
-          {items.map(item => (
-            <Col xs={24} sm={12} md={8} lg={6} key={item.id}>
-              <Card title={item.name} bordered>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <Switch
-                    checked={item.status}
-                    onChange={() => toggleStatus(item.id)}
-                    checkedChildren={<PoweroffOutlined />}
-                    unCheckedChildren={<PoweroffOutlined />}
-                    style={{ transform: 'scale(1.5)' }}
-                  />
-                  <Dropdown overlay={settingMenu} placement="bottomLeft">
-                    <Button icon={<SettingOutlined />}>Settings</Button>
-                  </Dropdown>
-                </div>
-              </Card>
-            </Col>
-          ))}
-        </Row>
-      </Content>
-    </Layout>
+
+        <Content style={{ padding: '20px' }}>
+          { props.isGrid ? (
+            <Row gutter={[16, 16]}>
+              {dataSource.map(item => (
+                <Col xs={24} sm={12} md={8} lg={6} key={item.id}>
+                  <Card title={item.name} bordered>
+                    <div style={{ display: 'flex', aligndataSource: 'center', gap: '16px' }}>
+                      <Switch
+                        checked={item.status}
+                        onChange={() => toggleStatus(item)}
+                        checkedChildren={<PoweroffOutlined />}
+                        unCheckedChildren={<PoweroffOutlined />}
+                        style={{ transform: 'scale(1.5)' }}
+                      />
+                      <Dropdown overlay={settingMenu} placement="bottomLeft">
+                        <Button icon={<SettingOutlined />}>Settings</Button>
+                      </Dropdown>
+                    </div>
+                  </Card>
+                </Col>
+              ))}
+            </Row>
+          ) : (
+            <List
+              dataSource={dataSource}
+              renderItem={item => (
+                <List.Item>
+                  <Card title={item.name} bordered style={{ width: '100%' }}>
+                    <div style={{ display: 'flex', aligndataSource: 'center', gap: '16px' }}>
+                      <Switch
+                        checked={item.status}
+                        onChange={() => toggleStatus(item.id)}
+                        checkedChildren={<PoweroffOutlined />}
+                        unCheckedChildren={<PoweroffOutlined />}
+                        style={{ transform: 'scale(1.5)' }}
+                      />
+                      <Dropdown overlay={settingMenu} placement="bottomLeft">
+                        <Button icon={<SettingOutlined />}>Settings</Button>
+                      </Dropdown>
+                    </div>
+                  </Card>
+                </List.Item>
+              )}
+            />
+          )}
+        </Content>
+
   );
 };
 

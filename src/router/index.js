@@ -9,6 +9,7 @@ import SideBar from "../layout/Layout";
 import NotFound from "../pages/NotFound";
 import Test from "../pages/Test";
 import Home from "../pages/Home"
+import { useState } from "react";
 
 
 const PrivateRoute = () => {
@@ -29,13 +30,29 @@ const PrivateRouteAdmin = () => {
   }
 };
 
+
 const Router = () => {
+  const [isGrid, setIsGrid] = useState(true);
+
   return (
     <BrowserRouter>
     <Routes>
-    <Route path="/" element={<Home />} />
-
-      <Route path="/test" element={<Test />} />
+    <Route
+          path="/"
+          element={
+            <SideBar>
+              <Home />
+            </SideBar>
+          }
+        />
+            <Route
+          path="/test"
+          element={
+            <SideBar isGrid={isGrid} setIsGrid={()=>setIsGrid(!isGrid)}>
+              <Test isGrid={isGrid}/>
+            </SideBar>
+          }
+        />
       <Route path="*" element={<NotFound />} />
     </Routes>
   </BrowserRouter>

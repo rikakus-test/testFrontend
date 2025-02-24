@@ -1,17 +1,33 @@
-import React, { Component, useEffect, useState } from "react";
-import { Row, Col, Button, Layout, Image } from "antd";
-import SideItem from "../components/SideItem";
-import bg from "../assets/image/bg.jpg";
-import { Header } from "antd/es/layout/layout";
-import { Link, useNavigate } from "react-router-dom";
-import logo from "../assets/image/puskesmas.png";
+import React, { useEffect, useState } from "react";
+import { Layout, Menu, Avatar, Dropdown, Button } from "antd";
+import {
+  UserOutlined,
+  VideoCameraOutlined,
+  UploadOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 
-const { Content, Sider } = Layout;
+const { Header, Sider, Content } = Layout;
 
-export default function SideBar(props) {
+const menuItems = [
+  { key: "1", icon: <UserOutlined />, label: "User" },
+  { key: "2", icon: <VideoCameraOutlined />, label: "Camera" },
+  { key: "3", icon: <UploadOutlined />, label: "Upload" },
+];
+
+const userMenu = (toggleView) => (
+  <Menu>
+    <Menu.Item key="1">Profile</Menu.Item>
+    <Menu.Item key="2">Logout</Menu.Item>
+    <Menu.Divider />
+    <Menu.Item key="3" onClick={toggleView}>Toggle View</Menu.Item>
+  </Menu>
+);
+
+export default function AntdLayoutPage(props) {
   const navigate = useNavigate();
-  const { children } = props;
-  const [isCollapse, setIsCollapse] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
   const [role, setRole] = useState(null);
 
   useEffect(() => {
@@ -19,164 +35,39 @@ export default function SideBar(props) {
     if (token) {
       setRole(token.role);
     }
-    console.log(token);
-  }, []);
-  const style = {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    width: "100%",
-    backgroundColor: "dark",
-  };
+    console.log(props)
 
+  }, []);
+
+  const toggleView = () => {
+    props.setIsGrid(!props.isGrid);
+  };
   return (
-    <Layout>
+    <Layout style={{ minHeight: "100vh" }}>
+      <Header
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          background: "#001529",
+          padding: "0 20px",
+        }}
+      >
+        <h2 style={{ color: "white" }}>Dashboard</h2>
+        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate("/add")}>
+            Add
+          </Button>
+          <Dropdown overlay={userMenu(toggleView)} placement="bottomRight">
+            <Avatar style={{ backgroundColor: "#87d068", cursor: "pointer" }} icon={<UserOutlined />} />
+          </Dropdown>
+        </div>
+      </Header>
       <Layout>
-        <Header>
-          <Row>
-            <Col
-              span={4}
-              style={{ ...style, paddingTop: "10px" }}
-              onClick={() => navigate("/")}
-            >
-              <img src={logo} width={40} alt="Logo"></img>
-            </Col>
-            {role === 0 ? (
-              <>
-                <Col span={6} style={style}>
-                  <SideItem link="/" title="Beranda" />
-                </Col>
-                <Col span={6} style={style}>
-                  <SideItem link="/admin" title="Admin" />
-                </Col>
-                <Col
-                  span={8}
-                  style={{
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    alignItems: "center",
-                    width: "100%",
-                    backgroundColor: "dark",
-                  }}
-                >
-                  <Button
-                    style={{ border: "none" }}
-                    onClick={() => {
-                      localStorage.removeItem("token");
-                      navigate("/login");
-                    }}
-                  >
-                    Keluar
-                  </Button>
-                </Col>
-              </>
-            ) : role === 1 ? (
-              <>
-                <Col span={4} style={style}>
-                  <SideItem link="/" title="Beranda" />
-                </Col>
-                <Col span={4} style={style}>
-                  <SideItem link="/periksa" title="Periksa" />
-                </Col>
-                <Col span={4} style={style}>
-                  <SideItem link="/detail" title="Akun" />
-                </Col>
-                <Col
-                  span={8}
-                  style={{
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    alignItems: "center",
-                    width: "100%",
-                    backgroundColor: "dark",
-                  }}
-                >
-                  <Button
-                    style={{ border: "none" }}
-                    onClick={() => {
-                      localStorage.removeItem("token");
-                      navigate("/login");
-                    }}
-                  >
-                    Keluar
-                  </Button>
-                </Col>
-              </>
-            ) : role === 2 ? (
-              <>
-                <Col span={6} style={style}>
-                  <SideItem link="/" title="Beranda" />
-                </Col>
-                <Col span={6} style={style}>
-                  <SideItem link="/detail" title="Akun" />
-                </Col>
-                <Col
-                  span={8}
-                  style={{
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    alignItems: "center",
-                    width: "100%",
-                    backgroundColor: "dark",
-                  }}
-                >
-                  <Button
-                    style={{ border: "none" }}
-                    onClick={() => {
-                      localStorage.removeItem("token");
-                      navigate("/login");
-                    }}
-                  >
-                    Keluar
-                  </Button>
-                </Col>
-              </>
-            ) : (
-              <>
-                <Col span={6} style={style}>
-                  <SideItem link="/" title="Beranda" />
-                </Col>
-                <Col
-                  span={14}
-                  style={{
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    alignItems: "center",
-                    width: "100%",
-                    backgroundColor: "dark",
-                  }}
-                >
-                  <Button
-                    style={{ border: "none" }}
-                    onClick={() => {
-                      navigate("/login");
-                    }}
-                  >
-                    Masuk
-                  </Button>
-                  <Button
-                    style={{ border: "none", marginLeft: "5px" }}
-                    onClick={() => {
-                      navigate("/register");
-                    }}
-                  >
-                    Daftar
-                  </Button>
-                </Col>
-              </>
-            )}
-          </Row>
-        </Header>
-        <Content
-          style={{
-            // padding: "20px",
-            height: "93vh",
-            overflow: "auto",
-            // backgroundImage: bg,
-          }}
-        >
-          {children}
-        </Content>
+        <Sider collapsible collapsed={collapsed} onCollapse={setCollapsed}>
+          <Menu theme="dark" defaultSelectedKeys={["1"]} mode="inline" items={menuItems} />
+        </Sider>
+        <Content style={{ padding: "20px" }}>{props.children}</Content>
       </Layout>
     </Layout>
   );
