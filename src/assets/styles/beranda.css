@@ -1,0 +1,17 @@
+.section {
+    height: 93vh;
+    /* background-color: #E5E5E5; */
+    background-image: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url("../image/puskesmas.png");
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: contain;
+    background-position: center;
+}
+
+.beranda {
+    height: 93vh;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
