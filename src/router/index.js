@@ -8,6 +8,7 @@ import {
 import SideBar from "../layout/Layout";
 import NotFound from "../pages/NotFound";
 import Test from "../pages/Test";
+import Home from "../pages/Home"
 
 
 const PrivateRoute = () => {
@@ -32,7 +33,8 @@ const Router = () => {
   return (
     <BrowserRouter>
     <Routes>
-      
+    <Route path="/" element={<Home />} />
+
       <Route path="/test" element={<Test />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
