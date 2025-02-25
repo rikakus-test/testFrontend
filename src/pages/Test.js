@@ -3,6 +3,7 @@ import { Layout, Avatar, Dropdown, Menu, Card, Button, Row, Col, Switch,List, Mo
 import { UserOutlined, SettingOutlined, PoweroffOutlined, PlusOutlined, HomeOutlined, LaptopOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import AxiosRequest from '../helper/AxiosRequest';
+import AddDataModal from '../components/Test';
 
 const { Header, Content, Sider } = Layout;
 
@@ -17,20 +18,6 @@ const menu = (toggleView) => (
   </Menu>
 );
 
-const settingMenu = (
-  <Menu>
-    <Menu.Item key="1">Option 1</Menu.Item>
-    <Menu.Item key="2">Option 2</Menu.Item>
-  </Menu>
-);
-
-const data = [
-  { id: 1, name: 'Item 1', status: true },
-  { id: 2, name: 'Item 2', status: false },
-  { id: 3, name: 'Item 3', status: true },
-  { id: 4, name: 'Item 4', status: false },
-];
-
 const Test = (props) => {
   const [dataSource, setDataSource] = useState([]);
   const [IsLoading, setIsLoading] = useState(false);
@@ -38,7 +25,7 @@ const Test = (props) => {
   const navigate = useNavigate();
 
     const getData = () => {
-      // setIsLoading(true);
+      setIsLoading(true);
       AxiosRequest.GetAxiosRequest("/items")
         .then((res) => {
           if (res.status === 200) {
@@ -47,9 +34,11 @@ const Test = (props) => {
         })
         .catch((err) => {
           console.log(err);
+          setDataSource([]);
+
         })
         .finally(() => {
-          // setIsLoading(false);
+          setIsLoading(false);
         });
     };
 
@@ -57,26 +46,28 @@ const Test = (props) => {
         getData();
         console.log(props)
       }, []);
-
+      useEffect(() => {
+        if(!props.visible){
+          getData();
+        }
+      }, [props.visible]);
   const toggleStatus = (a) => {
     setIsLoading(true);
-
     setDataSource(dataSource.map(item => item.id === a.id ? { ...item, status: item.status == 0 ? 1 : 0 } : item));
           AxiosRequest.PutAxiosRequest("/itemstatus/"+a.id, { ...a, status: a.status == 0 ? 1 : 0 })
             .then((res) => {
               console.log(res)
-
             })
             .catch((err) => {
+              setDataSource(dataSource.map(item => item.id === a.id ? { ...item, status: item.status == 0 ? 1 : 0 } : item));
               console.log(err);
             })
             .finally(() => {
-              setIsLoading(false);
               getData();
-
             });
   };
   const deleteData = (id) => {
+    setIsLoading(true);
             AxiosRequest.DeleteAxiosRequest("/items/" + id)
               .then((res) => {
                 console.log(res)
@@ -85,20 +76,38 @@ const Test = (props) => {
                 console.log(err);
               })
               .finally(() => {
-                // setIsLoading(false);
+                getData();
+
               });
   }
   const testr = true
-
+  const settingMenu= (item) => (
+    <Menu>
+      <Menu.Item key="1"><Button onClick={()=>deleteData(item.id)}>Delete</Button></Menu.Item>
+      <Menu.Item key="2">Option 2</Menu.Item>
+    </Menu>
+  );
   return (
 
         <Content style={{ padding: '20px' }}>
-                <Modal open={IsLoading} footer={null} closable={false} centered>
-        <div style={{ textAlign: "center", padding: "20px" }}>
+      {IsLoading && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "rgba(255, 255, 255, 0.8)",
+            zIndex: 9999,
+          }}
+        >
           <Spin size="large" />
-          <p>Loading, please wait...</p>
         </div>
-      </Modal>
+      )}
           { props.isGrid ? (
             <Row gutter={[16, 16]}>
               {dataSource.map(item => (
@@ -112,7 +121,7 @@ const Test = (props) => {
                         unCheckedChildren={<PoweroffOutlined />}
                         style={{ transform: 'scale(1.5)' }}
                       />
-                      <Dropdown overlay={settingMenu} placement="bottomLeft">
+                      <Dropdown overlay={()=>settingMenu(item)} placement="bottomLeft">
                         <Button icon={<SettingOutlined />}>Settings</Button>
                       </Dropdown>
                     </div>

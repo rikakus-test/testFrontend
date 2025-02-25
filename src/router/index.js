@@ -9,7 +9,7 @@ import SideBar from "../layout/Layout";
 import NotFound from "../pages/NotFound";
 import Test from "../pages/Test";
 import Home from "../pages/Home"
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 
 const PrivateRoute = () => {
@@ -33,23 +33,32 @@ const PrivateRouteAdmin = () => {
 
 const Router = () => {
   const [isGrid, setIsGrid] = useState(true);
+  const [visible, setVisible] = useState(false);
 
   return (
     <BrowserRouter>
     <Routes>
-    <Route
+            <Route
           path="/"
           element={
-            <SideBar>
-              <Home />
+            <SideBar isGrid={isGrid} setIsGrid={()=>setIsGrid(!isGrid)} visible={visible} setVisible={()=>setVisible(!visible)}>
+              <Home isGrid={isGrid} visible={visible} setVisible={()=>setVisible(!visible)}/>
             </SideBar>
           }
         />
-            <Route
-          path="/test"
+                    <Route
+          path="/devices"
           element={
-            <SideBar isGrid={isGrid} setIsGrid={()=>setIsGrid(!isGrid)}>
-              <Test isGrid={isGrid}/>
+            <SideBar isGrid={isGrid} setIsGrid={()=>setIsGrid(!isGrid)} visible={visible} setVisible={()=>setVisible(!visible)}>
+              <Test isGrid={isGrid} visible={visible} setVisible={()=>setVisible(!visible)}/>
+            </SideBar>
+          }
+        />
+                    <Route
+          path="/profile"
+          element={
+            <SideBar isGrid={isGrid} setIsGrid={()=>setIsGrid(!isGrid)} visible={visible} setVisible={()=>setVisible(!visible)}>
+              <NotFound isGrid={isGrid} visible={visible} setVisible={()=>setVisible(!visible)}/>
             </SideBar>
           }
         />
