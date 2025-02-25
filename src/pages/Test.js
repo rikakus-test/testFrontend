@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Layout, Avatar, Dropdown, Menu, Card, Button, Row, Col, Switch,List } from 'antd';
+import { Layout, Avatar, Dropdown, Menu, Card, Button, Row, Col, Switch,List, Modal, Spin } from 'antd';
 import { UserOutlined, SettingOutlined, PoweroffOutlined, PlusOutlined, HomeOutlined, LaptopOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import AxiosRequest from '../helper/AxiosRequest';
@@ -33,6 +33,8 @@ const data = [
 
 const Test = (props) => {
   const [dataSource, setDataSource] = useState([]);
+  const [IsLoading, setIsLoading] = useState(false);
+
   const navigate = useNavigate();
 
     const getData = () => {
@@ -40,7 +42,7 @@ const Test = (props) => {
       AxiosRequest.GetAxiosRequest("/items")
         .then((res) => {
           if (res.status === 200) {
-            setDataSource(res.data);
+            setDataSource(res.data.data);
           }
         })
         .catch((err) => {
@@ -57,8 +59,10 @@ const Test = (props) => {
       }, []);
 
   const toggleStatus = (a) => {
-    // setDataSource(dataSource.map(item => item.id === a.id ? { ...item, status: !item.status } : item));
-          AxiosRequest.PutAxiosRequest("/items/"+a.id, { ...a, status: !a.status })
+    setIsLoading(true);
+
+    setDataSource(dataSource.map(item => item.id === a.id ? { ...item, status: item.status == 0 ? 1 : 0 } : item));
+          AxiosRequest.PutAxiosRequest("/itemstatus/"+a.id, { ...a, status: a.status == 0 ? 1 : 0 })
             .then((res) => {
               console.log(res)
 
@@ -67,7 +71,7 @@ const Test = (props) => {
               console.log(err);
             })
             .finally(() => {
-              // setIsLoading(false);
+              setIsLoading(false);
               getData();
 
             });
@@ -89,6 +93,12 @@ const Test = (props) => {
   return (
 
         <Content style={{ padding: '20px' }}>
+                <Modal open={IsLoading} footer={null} closable={false} centered>
+        <div style={{ textAlign: "center", padding: "20px" }}>
+          <Spin size="large" />
+          <p>Loading, please wait...</p>
+        </div>
+      </Modal>
           { props.isGrid ? (
             <Row gutter={[16, 16]}>
               {dataSource.map(item => (
