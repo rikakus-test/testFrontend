@@ -10,6 +10,7 @@ import NotFound from "../pages/NotFound";
 import Test from "../pages/Test";
 import Home from "../pages/Home"
 import { useEffect, useState } from "react";
+import Admin from "../pages/Admin";
 
 
 const PrivateRoute = () => {
@@ -33,35 +34,51 @@ const PrivateRouteAdmin = () => {
 
 const Router = () => {
   const [isGrid, setIsGrid] = useState(true);
-  const [visible, setVisible] = useState(false);
-
+  const [menuItems, setMenuItems] = useState([
+    {
+      home_id: "home-001",
+      arduino_id: null,
+      home_name: "Rumah Utama",
+      tab_ip: "Jl. Merdeka No.1"
+    }
+  ]);
   return (
     <BrowserRouter>
     <Routes>
-            <Route
-          path="/"
+      <Route
+          path="/home"
           element={
-            <SideBar isGrid={isGrid} setIsGrid={()=>setIsGrid(!isGrid)} visible={visible} setVisible={()=>setVisible(!visible)}>
-              <Home isGrid={isGrid} visible={visible} setVisible={()=>setVisible(!visible)}/>
+            <SideBar isGrid={isGrid} setIsGrid={()=>setIsGrid(!isGrid)} menuItems={menuItems} setMenuItems={(data)=>setMenuItems(data)}>
+              <Home isGrid={isGrid} menuItems={menuItems} setMenuItems={(data)=>setMenuItems(data)}/>
             </SideBar>
           }
         />
-                    <Route
+         <Route
           path="/devices"
           element={
-            <SideBar isGrid={isGrid} setIsGrid={()=>setIsGrid(!isGrid)} visible={visible} setVisible={()=>setVisible(!visible)}>
-              <Test isGrid={isGrid} visible={visible} setVisible={()=>setVisible(!visible)}/>
+            <SideBar isGrid={isGrid} setIsGrid={()=>setIsGrid(!isGrid)} menuItems={menuItems} setMenuItems={(data)=>setMenuItems(data)}>
+              <Test isGrid={isGrid} />
             </SideBar>
           }
         />
-                    <Route
-          path="/profile"
+        <Route
+          path="/"
           element={
-            <SideBar isGrid={isGrid} setIsGrid={()=>setIsGrid(!isGrid)} visible={visible} setVisible={()=>setVisible(!visible)}>
-              <NotFound isGrid={isGrid} visible={visible} setVisible={()=>setVisible(!visible)}/>
+            <SideBar isGrid={isGrid} setIsGrid={()=>setIsGrid(!isGrid)} menuItems={menuItems} setMenuItems={(data)=>setMenuItems(data)}>
+              <NotFound isGrid={isGrid} />
             </SideBar>
           }
         />
+        {menuItems.map(item => (
+        <Route
+        path={"/" + item.home_id}
+        element={
+          <SideBar isGrid={isGrid} setIsGrid={()=>setIsGrid(!isGrid)} menuItems={menuItems} setMenuItems={(data)=>setMenuItems(data)}>
+          <Admin isGrid={isGrid} menuItems={menuItems} setMenuItems={(data)=>setMenuItems(data)}/>
+        </SideBar>
+        }
+      />
+  ))}
       <Route path="*" element={<NotFound />} />
     </Routes>
   </BrowserRouter>

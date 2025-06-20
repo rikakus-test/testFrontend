@@ -4,56 +4,79 @@ import {
   UserOutlined,
   VideoCameraOutlined,
   UploadOutlined,
-  PlusOutlined,
   HomeOutlined,
   LaptopOutlined,
+  CloseOutlined,
+  MenuOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import AddDataModal from "../components/Test";
+import { AppstoreOutlined, MailOutlined, SettingOutlined } from '@ant-design/icons';
 
 const { Header, Sider, Content } = Layout;
-
-const menuItems = [
-  { key: "1", icon: <UserOutlined />, label: "User" },
-  { key: "2", icon: <VideoCameraOutlined />, label: "Camera" },
-  { key: "3", icon: <UploadOutlined />, label: "Upload" },
-];
-
-const userMenu = (toggleView) => (
-  <Menu>
-    <Menu.Item key="1">Profile</Menu.Item>
-    <Menu.Item key="2">Logout</Menu.Item>
-    <Menu.Divider />
-    <Menu.Item key="3" onClick={toggleView}>Toggle View</Menu.Item>
-  </Menu>
-);
 
 export default function AntdLayoutPage(props) {
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
-
-
-  const showModal = () => props.setVisible();
+  const [theme, setTheme] = useState('dark');
+  const [current, setCurrent] = useState('/');
+  const changeTheme = value => {
+    setTheme(value ? 'dark' : 'light');
+  };
+  const userMenu = (toggleView) => (
+    <Menu>
+      <Menu.Item key="1">Profile</Menu.Item>
+      <Menu.Item key="2">Logout</Menu.Item>
+      <Menu.Divider />
+      <Menu.Item key="3" onClick={toggleView}>{props.isGrid ? <AppstoreOutlined /> : <MenuOutlined />}</Menu.Item>
+    </Menu>
+  );
+  const onClick = e => {
+    console.log('click ', e);
+    setCurrent(e.key);
+    navigate(e.key);
+  };
 
   const toggleView = () => {
     props.setIsGrid(!props.isGrid);
   };
-  const handleMenuClick = (e) => {
-    switch (e.key) {
-      case "1":
-        navigate("/");
-        break;
-      case "2":
-        navigate("/devices");
-        break;
-      case "3":
-        navigate("/profile");
-        break;
-      default:
-        break;
+
+  const [menuItems, setMenuItems] = useState([]);
+  const items =     [{
+    key: '/',
+    label: 'test 1',
+    icon: <MailOutlined />,
+  },
+  {
+    key: '/home',
+    label: 'Home',
+    icon: <HomeOutlined />,
+  },
+  {
+    key: '/devices',
+    label: 'Navigation Two',
+    icon: <AppstoreOutlined />,
+  }
+  ];
+  
+  // Handler hapus item
+  const handleDelete = (key) => {
+    console.log(window.location.href);
+    console.log(current);
+
+    setMenuItems(prev => prev.filter(item => item.home_id !== key));
+    props.setMenuItems(prev => prev.filter(item => item.home_id !== key));
+
+    if (current === `/${key}`) {
+      console.log("jalan");
+      
+      setCurrent('/home');
+      navigate('/home');
     }
   };
-
+      useEffect(() => {
+        setMenuItems(props.menuItems);
+        console.log(props)
+      }, [props]);
   return (
     <Layout style={{ minHeight: "100vh" }}>
       <Header
@@ -67,7 +90,6 @@ export default function AntdLayoutPage(props) {
       >
         <h2 style={{ color: "white" }}>Dashboard</h2>
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-      <AddDataModal showModal={showModal}></AddDataModal>
           <Dropdown overlay={userMenu(toggleView)} placement="bottomRight">
             <Avatar style={{ backgroundColor: "#87d068", cursor: "pointer" }} icon={<UserOutlined />} />
           </Dropdown>
@@ -75,11 +97,36 @@ export default function AntdLayoutPage(props) {
       </Header>
       <Layout>
         <Sider collapsible collapsed={collapsed} onCollapse={setCollapsed}>
-        <Menu theme="dark" defaultSelectedKeys={["1"]} mode="inline" onClick={handleMenuClick}>
-            <Menu.Item key="1" icon={<HomeOutlined />}>Home</Menu.Item>
-            <Menu.Item key="2" icon={<LaptopOutlined />}>Devices</Menu.Item>
-            <Menu.Item key="3" icon={<UserOutlined />}>Profile</Menu.Item>
-          </Menu>        </Sider>
+        <Menu
+  theme={theme}
+  onClick={onClick}
+  selectedKeys={[current]}
+  mode="inline"
+>
+{items.map(item => (
+    <Menu.Item key={item.key} icon={item.icon} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <span onClick={() => navigate(item.key)}>{item.label}</span>
+    </Menu.Item>
+  ))}
+  {menuItems.map(item => (
+    <Menu.Item key={`/${item.home_id}`} icon={<HomeOutlined></HomeOutlined>} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <span onClick={() => navigate("/"+item.home_id)}>{item.home_name}</span>
+      <Button
+        type="link"
+        danger
+        size="small"
+        onClick={(e) => {
+          e.stopPropagation(); // agar tidak trigger navigate
+          handleDelete(item.home_id);
+        }}
+      >
+        <CloseOutlined />
+      </Button>
+    </Menu.Item>
+  ))}
+</Menu>
+
+       </Sider>
         <Content style={{ padding: "20px" }}>{props.children}</Content>
       </Layout>
     </Layout>

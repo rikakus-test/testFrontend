@@ -4,7 +4,6 @@ import { UserOutlined, SettingOutlined, PoweroffOutlined, PlusOutlined, HomeOutl
 import { useNavigate } from 'react-router-dom';
 import AxiosRequest from '../helper/AxiosRequest';
 import AddDataModal from '../components/Test';
-const { Meta } = Card;
 
 const { Header, Content, Sider } = Layout;
 
@@ -19,16 +18,15 @@ const menu = (toggleView) => (
   </Menu>
 );
 
-const Test = (props) => {
+const Admin = (props) => {
   const [dataSource, setDataSource] = useState([]);
   const [IsLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
-  
 
     const getData = () => {
       setIsLoading(true);
-      AxiosRequest.GetAxiosRequest("/homes")
+      AxiosRequest.GetAxiosRequest("/arduinos")
         .then((res) => {
           if (res.status === 200) {
             setDataSource(res.data.data);
@@ -56,7 +54,7 @@ const Test = (props) => {
   const toggleStatus = (a) => {
     setIsLoading(true);
     setDataSource(dataSource.map(item => item.id === a.id ? { ...item, status: item.status == 0 ? 1 : 0 } : item));
-          AxiosRequest.PutAxiosRequest("/homes/"+a.id, { ...a, status: a.status == 0 ? 1 : 0 })
+          AxiosRequest.PutAxiosRequest("/itemstatus/"+a.id, { ...a, status: a.status == 0 ? 1 : 0 })
             .then((res) => {
               console.log(res)
             })
@@ -70,7 +68,7 @@ const Test = (props) => {
   };
   const deleteData = (id) => {
     setIsLoading(true);
-            AxiosRequest.DeleteAxiosRequest("/homes/" + id)
+            AxiosRequest.DeleteAxiosRequest("/items/" + id)
               .then((res) => {
                 console.log(res)
               })
@@ -89,17 +87,6 @@ const Test = (props) => {
       <Menu.Item key="2">Option 2</Menu.Item>
     </Menu>
   );
-  const handleAdd = (key) => {
-    console.log(key);
-    Object.assign(props.menuItems, key);
-    // setMenuItems(prev => prev.filter(item => item.key !== key));
-    props.setMenuItems([...props.menuItems,key]);
-
-    // if (current === key) {
-    //   setCurrent('/');
-    //   navigate('/');
-    // }
-  };
   return (
 
         <Content style={{ padding: '20px' }}>
@@ -124,22 +111,19 @@ const Test = (props) => {
           { props.isGrid ? (
             <Row gutter={[16, 16]}>
               {dataSource.map(item => (
-                <Col xs={24} sm={12} md={8} lg={6} key={item.home_id}>
-                  <Card  bordered     actions={[
-                      <Button icon={<SettingOutlined />}         onClick={(e) => {
-                        handleAdd(item);
-                      }}>Open</Button>
-                      ]}>
+                <Col xs={24} sm={12} md={8} lg={6} key={item.id}>
+                  <Card title={item.name} bordered>
                     <div style={{ display: 'flex', aligndataSource: 'center', gap: '16px' }}>
-                      {/* <Switch
+                      <Switch
                         checked={item.status}
                         onChange={() => toggleStatus(item)}
                         checkedChildren={<PoweroffOutlined />}
                         unCheckedChildren={<PoweroffOutlined />}
                         style={{ transform: 'scale(1.5)' }}
-                      /> */}
-    <Meta title={item.home_name} description={item.tab_ip}    />
-
+                      />
+                      <Dropdown overlay={()=>settingMenu(item)} placement="bottomLeft">
+                        <Button icon={<SettingOutlined />}>Settings</Button>
+                      </Dropdown>
                     </div>
                   </Card>
                 </Col>
@@ -150,11 +134,11 @@ const Test = (props) => {
               dataSource={dataSource}
               renderItem={item => (
                 <List.Item>
-                  <Card title={item.home_name} bordered style={{ width: '100%' }}>
+                  <Card title={item.name} bordered style={{ width: '100%' }}>
                     <div style={{ display: 'flex', aligndataSource: 'center', gap: '16px' }}>
                       <Switch
                         checked={item.status}
-                        onChange={() => toggleStatus(item)}
+                        onChange={() => toggleStatus(item.id)}
                         checkedChildren={<PoweroffOutlined />}
                         unCheckedChildren={<PoweroffOutlined />}
                         style={{ transform: 'scale(1.5)' }}
@@ -173,4 +157,4 @@ const Test = (props) => {
   );
 };
 
-export default Test;
+export default Admin;
