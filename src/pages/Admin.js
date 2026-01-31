@@ -26,7 +26,7 @@ const Admin = (props) => {
 
     const getData = () => {
       setIsLoading(true);
-      AxiosRequest.GetAxiosRequest("/arduinos")
+      AxiosRequest.GetAxiosRequest("/arduino")
         .then((res) => {
           if (res.status === 200) {
             setDataSource(res.data.data);
@@ -54,7 +54,7 @@ const Admin = (props) => {
   const toggleStatus = (a) => {
     setIsLoading(true);
     setDataSource(dataSource.map(item => item.id === a.id ? { ...item, status: item.status == 0 ? 1 : 0 } : item));
-          AxiosRequest.PutAxiosRequest("/itemstatus/"+a.id, { ...a, status: a.status == 0 ? 1 : 0 })
+          AxiosRequest.PutAxiosRequest("/device/"+a.id, { ...a, status: a.status == 0 ? 1 : 0 })
             .then((res) => {
               console.log(res)
             })
@@ -68,7 +68,7 @@ const Admin = (props) => {
   };
   const deleteData = (id) => {
     setIsLoading(true);
-            AxiosRequest.DeleteAxiosRequest("/items/" + id)
+            AxiosRequest.DeleteAxiosRequest("/device/" + id)
               .then((res) => {
                 console.log(res)
               })

@@ -9,18 +9,20 @@ import SideBar from "../layout/Layout";
 import NotFound from "../pages/NotFound";
 import Test from "../pages/Test";
 import Home from "../pages/Home"
+import Arduino from "../pages/Arduino";
+import Device from "../pages/Device";
 import { useEffect, useState } from "react";
 import Admin from "../pages/Admin";
-
+import Login from "../pages/Auth/Login";
+import Register from"../pages/Auth/Register"
+import Forget from "../pages/Auth/Forget"
+import NewPasswword from "../pages/Auth/NewPassword"
 
 const PrivateRoute = () => {
   const token = JSON.parse(localStorage.getItem("token"));
-  if (!token) {
-    return <Navigate to="/login" />;
-  } else {
-    return <Outlet />;
-  }
+  return token ? <Outlet /> : <Navigate to="/login" replace />;
 };
+
 
 const PrivateRouteAdmin = () => {
   const token = JSON.parse(localStorage.getItem("token"));
@@ -35,53 +37,99 @@ const PrivateRouteAdmin = () => {
 const Router = () => {
   const [isGrid, setIsGrid] = useState(true);
   const [menuItems, setMenuItems] = useState([
-    {
-      home_id: "home-001",
-      arduino_id: null,
-      home_name: "Rumah Utama",
-      tab_ip: "Jl. Merdeka No.1"
-    }
   ]);
   return (
     <BrowserRouter>
-    <Routes>
-      <Route
-          path="/home"
-          element={
-            <SideBar isGrid={isGrid} setIsGrid={()=>setIsGrid(!isGrid)} menuItems={menuItems} setMenuItems={(data)=>setMenuItems(data)}>
-              <Home isGrid={isGrid} menuItems={menuItems} setMenuItems={(data)=>setMenuItems(data)}/>
-            </SideBar>
-          }
-        />
-         <Route
-          path="/devices"
-          element={
-            <SideBar isGrid={isGrid} setIsGrid={()=>setIsGrid(!isGrid)} menuItems={menuItems} setMenuItems={(data)=>setMenuItems(data)}>
-              <Test isGrid={isGrid} />
-            </SideBar>
-          }
-        />
+      <Routes>
+        {/* ================= PUBLIC ROUTES ================= */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/forget" element={<Forget />} />
+        <Route path="/new-password" element={<NewPasswword />} />
         <Route
           path="/"
           element={
-            <SideBar isGrid={isGrid} setIsGrid={()=>setIsGrid(!isGrid)} menuItems={menuItems} setMenuItems={(data)=>setMenuItems(data)}>
-              <NotFound isGrid={isGrid} />
+            <SideBar
+              isGrid={isGrid}
+              setIsGrid={() => setIsGrid(!isGrid)}
+              menuItems={menuItems}
+              setMenuItems={setMenuItems}
+            >
+              <Test />
             </SideBar>
           }
         />
-        {menuItems.map(item => (
-        <Route
-        path={"/" + item.home_id}
-        element={
-          <SideBar isGrid={isGrid} setIsGrid={()=>setIsGrid(!isGrid)} menuItems={menuItems} setMenuItems={(data)=>setMenuItems(data)}>
-          <Admin isGrid={isGrid} menuItems={menuItems} setMenuItems={(data)=>setMenuItems(data)}/>
-        </SideBar>
-        }
-      />
-  ))}
-      <Route path="*" element={<NotFound />} />
-    </Routes>
-  </BrowserRouter>
+        {/* ================= PRIVATE ROUTES ================= */}
+        <Route element={<PrivateRoute />}>
+          <Route
+            path="/home"
+            element={
+              <SideBar
+                isGrid={isGrid}
+                setIsGrid={() => setIsGrid(!isGrid)}
+                menuItems={menuItems}
+                setMenuItems={setMenuItems}
+              >
+                <Home
+                  isGrid={isGrid}
+                  menuItems={menuItems}
+                  setMenuItems={setMenuItems}
+                />
+              </SideBar>
+            }
+          />
+
+          <Route
+            path="/arduino"
+            element={
+              <SideBar
+                isGrid={isGrid}
+                setIsGrid={() => setIsGrid(!isGrid)}
+                menuItems={menuItems}
+                setMenuItems={setMenuItems}
+              >
+                <Arduino isGrid={isGrid} />
+              </SideBar>
+            }
+          />
+
+          <Route
+            path="/devices"
+            element={
+              <SideBar
+                isGrid={isGrid}
+                setIsGrid={() => setIsGrid(!isGrid)}
+                menuItems={menuItems}
+                setMenuItems={setMenuItems}
+              >
+                <Device isGrid={isGrid} />
+              </SideBar>
+            }
+          />
+
+          {/* dynamic route dari menuItems */}
+          {menuItems.map((item) => (
+            <Route
+              key={item.home_id}
+              path={`/${item.home_id}`}
+              element={
+                <SideBar
+                  isGrid={isGrid}
+                  setIsGrid={() => setIsGrid(!isGrid)}
+                  menuItems={menuItems}
+                  setMenuItems={setMenuItems}
+                >
+                  <Admin />
+                </SideBar>
+              }
+            />
+          ))}
+        </Route>
+
+        {/* ================= FALLBACK ================= */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </BrowserRouter>
   );
 };
 

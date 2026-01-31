@@ -6,32 +6,35 @@ const AddDataModal = (props) => {
   const [visible, setVisible] = useState(props.visible);
   const [form] = Form.useForm();
 
-        useEffect(() => {
-            props.showModal()
-                }, [visible]);
+  useEffect(() => {
+    props.showModal();
+  }, [visible]);
 
   const showModal = () => setVisible(true);
   const handleCancel = () => setVisible(false);
   const handleSubmit = () => {
     form.validateFields().then((a) => {
       console.log("Submitted Data:", a);
-            AxiosRequest.PostAxiosRequest("/items", { ...a, status: a.status == true ? 1 : 0 })
-              .then((res) => {
-                console.log(res)
-              })
-              .catch((err) => {
-                console.log(err);
-              })
-              .finally(() => {
-                form.resetFields()
-                setVisible(false);
-              });
-            });
-    };
+      AxiosRequest.PostAxiosRequest("/items", {
+        ...a,
+        status: a.status == true ? 1 : 0,
+      })
+        .then((res) => {
+          console.log(res);
+        })
+        .catch((err) => {
+          console.log(err);
+        })
+        .finally(() => {
+          form.resetFields();
+          setVisible(false);
+        });
+    });
+  };
 
   return (
     <div>
-        <Button type="primary" onClick={showModal}>
+      <Button type="primary" onClick={showModal}>
         Add Data
       </Button>
       <Modal

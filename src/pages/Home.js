@@ -1,176 +1,195 @@
-import React, { useEffect, useState } from 'react';
-import { Layout, Avatar, Dropdown, Menu, Card, Button, Row, Col, Switch,List, Modal, Spin } from 'antd';
-import { UserOutlined, SettingOutlined, PoweroffOutlined, PlusOutlined, HomeOutlined, LaptopOutlined } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
-import AxiosRequest from '../helper/AxiosRequest';
-import AddDataModal from '../components/Test';
+import React, { useEffect, useState } from "react";
+import {
+  Layout,
+  Card,
+  Button,
+  Row,
+  Col,
+  Switch,
+  List,
+  Dropdown,
+  Menu,
+  Spin,
+  Space,
+} from "antd";
+import { SettingOutlined, PoweroffOutlined } from "@ant-design/icons";
+import AxiosRequest from "../helper/AxiosRequest";
+import AddEditHomeModal from "../components/Modal/Home";
+
+const { Content } = Layout;
 const { Meta } = Card;
 
-const { Header, Content, Sider } = Layout;
+const Home = ({ visible, isGrid, menuItems, setMenuItems }) => {
+  const [homes, setHomes] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-const menu = (toggleView) => (
-  <Menu>
-    <Menu.Item key="1">Profile</Menu.Item>
-    <Menu.Item key="2">Logout</Menu.Item>
-    <Menu.Divider />
-    <Menu.Item key="3" onClick={toggleView}>
-      Toggle View
-    </Menu.Item>
-  </Menu>
-);
+  const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState("add");
+  const [selectedHome, setSelectedHome] = useState(null);
 
-const Test = (props) => {
-  const [dataSource, setDataSource] = useState([]);
-  const [IsLoading, setIsLoading] = useState(false);
-
-  const navigate = useNavigate();
-  
-
-    const getData = () => {
-      setIsLoading(true);
-      AxiosRequest.GetAxiosRequest("/homes")
-        .then((res) => {
-          if (res.status === 200) {
-            setDataSource(res.data.data);
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-          setDataSource([]);
-
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
-    };
-
-      useEffect(() => {
-        getData();
-        console.log(props)
-      }, []);
-      useEffect(() => {
-        if(!props.visible){
-          getData();
-        }
-      }, [props.visible]);
-  const toggleStatus = (a) => {
+  /* ===================== API ===================== */
+  const getHomes = async () => {
     setIsLoading(true);
-    setDataSource(dataSource.map(item => item.id === a.id ? { ...item, status: item.status == 0 ? 1 : 0 } : item));
-          AxiosRequest.PutAxiosRequest("/homes/"+a.id, { ...a, status: a.status == 0 ? 1 : 0 })
-            .then((res) => {
-              console.log(res)
-            })
-            .catch((err) => {
-              setDataSource(dataSource.map(item => item.id === a.id ? { ...item, status: item.status == 0 ? 1 : 0 } : item));
-              console.log(err);
-            })
-            .finally(() => {
-              getData();
-            });
+    try {
+      const res = await AxiosRequest.GetAxiosRequest("/home");
+      if (res.status === 200) {
+        setHomes(res.data.data);
+      }
+    } catch (err) {
+      console.error(err);
+      setHomes([]);
+    } finally {
+      setIsLoading(false);
+    }
   };
-  const deleteData = (id) => {
+
+  const toggleStatus = async (home) => {
+    const newStatus = home.status === 0 ? 1 : 0;
+
+    // optimistic update
+    setHomes((prev) =>
+      prev.map((item) =>
+        item.id === home.id ? { ...item, status: newStatus } : item
+      )
+    );
+
+    try {
+      await AxiosRequest.PutAxiosRequest(`/home/${home.id}`, {
+        ...home,
+        status: newStatus,
+      });
+    } catch (err) {
+      console.error(err);
+      // rollback
+      setHomes((prev) =>
+        prev.map((item) =>
+          item.id === home.id ? { ...item, status: home.status } : item
+        )
+      );
+    } finally {
+      getHomes();
+    }
+  };
+
+  const deleteHome = async (id) => {
     setIsLoading(true);
-            AxiosRequest.DeleteAxiosRequest("/homes/" + id)
-              .then((res) => {
-                console.log(res)
-              })
-              .catch((err) => {
-                console.log(err);
-              })
-              .finally(() => {
-                getData();
-
-              });
-  }
-  const testr = true
-  const settingMenu= (item) => (
-    <Menu>
-      <Menu.Item key="1"><Button onClick={()=>deleteData(item.id)}>Delete</Button></Menu.Item>
-      <Menu.Item key="2">Option 2</Menu.Item>
-    </Menu>
-  );
-  const handleAdd = (key) => {
-    console.log(key);
-    Object.assign(props.menuItems, key);
-    // setMenuItems(prev => prev.filter(item => item.key !== key));
-    props.setMenuItems([...props.menuItems,key]);
-
-    // if (current === key) {
-    //   setCurrent('/');
-    //   navigate('/');
-    // }
+    try {
+      await AxiosRequest.DeleteAxiosRequest(`/home/${id}`);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      getHomes();
+    }
   };
+
+  /* ===================== EFFECT ===================== */
+  useEffect(() => {
+    getHomes();
+  }, []);
+
+  useEffect(() => {
+    if (!visible) getHomes();
+  }, [visible]);
+
+  /* ===================== UI HANDLER ===================== */
+  const openAdd = () => {
+    setMode("add");
+    setSelectedHome(null);
+    setOpen(true);
+  };
+
+  const openEdit = (home) => {
+    setMode("edit");
+    setSelectedHome(home);
+    setOpen(true);
+  };
+
+  const handleAddMenu = (home) => {
+    setMenuItems([...menuItems, home]);
+  };
+
+  /* ===================== RENDER ===================== */
   return (
+    <Content style={{ padding: 20 }}>
+      <Space style={{ marginBottom: 16 }}>
+        <Button type="primary" onClick={openAdd}>
+          Add Home
+        </Button>
+      </Space>
 
-        <Content style={{ padding: '20px' }}>
-      {IsLoading && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: "rgba(255, 255, 255, 0.8)",
-            zIndex: 9999,
-          }}
-        >
+      <AddEditHomeModal
+        open={open}
+        mode={mode}
+        initialData={selectedHome}
+        onCancel={() => setOpen(false)}
+        onSuccess={getHomes}
+      />
+
+      {isLoading && (
+        <div className="fullscreen-loader">
           <Spin size="large" />
         </div>
       )}
-          { props.isGrid ? (
-            <Row gutter={[16, 16]}>
-              {dataSource.map(item => (
-                <Col xs={24} sm={12} md={8} lg={6} key={item.home_id}>
-                  <Card  bordered     actions={[
-                      <Button icon={<SettingOutlined />}         onClick={(e) => {
-                        handleAdd(item);
-                      }}>Open</Button>
-                      ]}>
-                    <div style={{ display: 'flex', aligndataSource: 'center', gap: '16px' }}>
-                      {/* <Switch
-                        checked={item.status}
-                        onChange={() => toggleStatus(item)}
-                        checkedChildren={<PoweroffOutlined />}
-                        unCheckedChildren={<PoweroffOutlined />}
-                        style={{ transform: 'scale(1.5)' }}
-                      /> */}
-    <Meta title={item.home_name} description={item.tab_ip}    />
 
-                    </div>
-                  </Card>
-                </Col>
-              ))}
-            </Row>
-          ) : (
-            <List
-              dataSource={dataSource}
-              renderItem={item => (
-                <List.Item>
-                  <Card title={item.home_name} bordered style={{ width: '100%' }}>
-                    <div style={{ display: 'flex', aligndataSource: 'center', gap: '16px' }}>
-                      <Switch
-                        checked={item.status}
-                        onChange={() => toggleStatus(item)}
-                        checkedChildren={<PoweroffOutlined />}
-                        unCheckedChildren={<PoweroffOutlined />}
-                        style={{ transform: 'scale(1.5)' }}
-                      />
-                      <Dropdown overlay={settingMenu} placement="bottomLeft">
-                        <Button icon={<SettingOutlined />}>Settings</Button>
-                      </Dropdown>
-                    </div>
-                  </Card>
-                </List.Item>
-              )}
-            />
+      {isGrid ? (
+        <Row gutter={[16, 16]}>
+          {homes.map((item) => (
+            <Col xs={24} sm={12} md={8} lg={6} key={item.id}>
+              <Card
+                actions={[
+                  <Button onClick={() => handleAddMenu(item)}>Open</Button>,
+                  <Button onClick={() => openEdit(item)}>Edit</Button>,
+                  <Button danger onClick={() => deleteHome(item.id)}>
+                    Delete
+                  </Button>,
+                ]}
+              >
+                <Meta title={item.name} description={item.tab_ip} />
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      ) : (
+        <List
+          dataSource={homes}
+          renderItem={(item) => (
+            <List.Item>
+              <Card style={{ width: "100%" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  {/* Nama */}
+                  <span style={{ fontWeight: 500 }}>{item.name}</span>
+
+                  {/* Button group */}
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <Button size="small" onClick={() => handleAddMenu(item)}>
+                      Open
+                    </Button>
+                    ,
+                    <Button size="small" onClick={() => openEdit(item)}>
+                      Edit
+                    </Button>
+                    <Button
+                      size="small"
+                      danger
+                      onClick={() => deleteHome(item.id)}
+                    >
+                      Delete
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            </List.Item>
           )}
-        </Content>
-
+        />
+      )}
+    </Content>
   );
 };
 
-export default Test;
+export default Home;
