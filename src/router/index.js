@@ -19,9 +19,12 @@ import Forget from "../pages/Auth/Forget"
 import NewPasswword from "../pages/Auth/NewPassword"
 
 const PrivateRoute = () => {
+  if (typeof window === "undefined") return null;
+
   const token = JSON.parse(localStorage.getItem("token"));
   return token ? <Outlet /> : <Navigate to="/login" replace />;
 };
+
 
 
 const PrivateRouteAdmin = () => {
