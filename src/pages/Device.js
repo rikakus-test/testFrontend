@@ -20,6 +20,7 @@ import {
 } from "@ant-design/icons";
 import AxiosRequest from "../helper/AxiosRequest";
 import AddEditDeviceModal from "../components/Modal/Device";
+import Swal from "sweetalert2";
 
 const { Content } = Layout;
 const { Meta } = Card;
@@ -38,8 +39,16 @@ const Device = ({ visible, isGrid, setIsGrid }) => {
     setLoading(true);
     try {
       const res = await AxiosRequest.GetAxiosRequest("/device");
-      if (res.status === 200) {
+      if (res.status === 200 && res.data.code !== 404) {
         setDevices(res.data.data);
+      } else {
+        setDevices([]);
+                Swal.fire({
+                  icon: "error",
+                  title: "Terjadi Kesalahan",
+                  text: "Silakan coba lagi beberapa saat.",
+                  confirmButtonColor: "#d33",
+                });
       }
     } catch (err) {
       console.error(err);
@@ -55,8 +64,8 @@ const Device = ({ visible, isGrid, setIsGrid }) => {
     // optimistic UI
     setDevices((prev) =>
       prev.map((item) =>
-        item.id === arduino.id ? { ...item, status: newStatus } : item
-      )
+        item.id === arduino.id ? { ...item, status: newStatus } : item,
+      ),
     );
 
     try {
@@ -85,10 +94,6 @@ const Device = ({ visible, isGrid, setIsGrid }) => {
   useEffect(() => {
     fetchDevices();
   }, []);
-
-  useEffect(() => {
-    if (!visible) fetchDevices();
-  }, [visible]);
 
   /* ===================== UI HANDLER ===================== */
   const openAdd = () => {
@@ -148,13 +153,20 @@ const Device = ({ visible, isGrid, setIsGrid }) => {
               <Card
                 actions={[
                   <Switch
+                    size="small"
                     checked={item.status === 1}
                     onChange={() => toggleStatus(item)}
                     checkedChildren={<PoweroffOutlined />}
                     unCheckedChildren={<PoweroffOutlined />}
                   />,
-                  <Button onClick={() => openEdit(item)}>Edit</Button>,
-                  <Button danger onClick={() => deleteDevice(item.id)}>
+                  <Button size="small" onClick={() => openEdit(item)}>
+                    Edit
+                  </Button>,
+                  <Button
+                    size="small"
+                    danger
+                    onClick={() => deleteDevice(item.id)}
+                  >
                     Delete
                   </Button>,
                 ]}
@@ -189,7 +201,6 @@ const Device = ({ visible, isGrid, setIsGrid }) => {
                       checkedChildren={<PoweroffOutlined />}
                       unCheckedChildren={<PoweroffOutlined />}
                     />
-                    ,
                     <Button size="small" onClick={() => openEdit(item)}>
                       Edit
                     </Button>

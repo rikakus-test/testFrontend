@@ -15,6 +15,8 @@ import {
 import { SettingOutlined, PoweroffOutlined } from "@ant-design/icons";
 import AxiosRequest from "../helper/AxiosRequest";
 import AddEditHomeModal from "../components/Modal/Home";
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 const { Content } = Layout;
 const { Meta } = Card;
@@ -22,6 +24,7 @@ const { Meta } = Card;
 const Home = ({ visible, isGrid, menuItems, setMenuItems }) => {
   const [homes, setHomes] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState("add");
@@ -32,8 +35,17 @@ const Home = ({ visible, isGrid, menuItems, setMenuItems }) => {
     setIsLoading(true);
     try {
       const res = await AxiosRequest.GetAxiosRequest("/home");
-      if (res.status === 200) {
+
+      if (res.status === 200 && res.data.code !== 404) {
         setHomes(res.data.data);
+      } else {
+        setHomes([]);
+        Swal.fire({
+          icon: "error",
+          title: "Terjadi Kesalahan",
+          text: "Silakan coba lagi beberapa saat.",
+          confirmButtonColor: "#d33",
+        });
       }
     } catch (err) {
       console.error(err);
@@ -49,8 +61,8 @@ const Home = ({ visible, isGrid, menuItems, setMenuItems }) => {
     // optimistic update
     setHomes((prev) =>
       prev.map((item) =>
-        item.id === home.id ? { ...item, status: newStatus } : item
-      )
+        item.id === home.id ? { ...item, status: newStatus } : item,
+      ),
     );
 
     try {
@@ -63,8 +75,8 @@ const Home = ({ visible, isGrid, menuItems, setMenuItems }) => {
       // rollback
       setHomes((prev) =>
         prev.map((item) =>
-          item.id === home.id ? { ...item, status: home.status } : item
-        )
+          item.id === home.id ? { ...item, status: home.status } : item,
+        ),
       );
     } finally {
       getHomes();
@@ -85,11 +97,8 @@ const Home = ({ visible, isGrid, menuItems, setMenuItems }) => {
   /* ===================== EFFECT ===================== */
   useEffect(() => {
     getHomes();
-  }, []);
-
-  useEffect(() => {
-    if (!visible) getHomes();
-  }, [visible]);
+    console.log("ini jalan");
+    }, [window.location.pathname]);
 
   /* ===================== UI HANDLER ===================== */
   const openAdd = () => {
@@ -105,7 +114,15 @@ const Home = ({ visible, isGrid, menuItems, setMenuItems }) => {
   };
 
   const handleAddMenu = (home) => {
-    setMenuItems([...menuItems, home]);
+    const exists = menuItems.some((item) => item.id === home.id);
+
+    if (exists) {
+      navigate("/" + home.id);
+      return;
+    }
+
+    setMenuItems((prev) => [...prev, home]);
+    navigate("/" + home.id);
   };
 
   /* ===================== RENDER ===================== */
@@ -137,9 +154,17 @@ const Home = ({ visible, isGrid, menuItems, setMenuItems }) => {
             <Col xs={24} sm={12} md={8} lg={6} key={item.id}>
               <Card
                 actions={[
-                  <Button onClick={() => handleAddMenu(item)}>Open</Button>,
-                  <Button onClick={() => openEdit(item)}>Edit</Button>,
-                  <Button danger onClick={() => deleteHome(item.id)}>
+                  <Button size="small" onClick={() => handleAddMenu(item)}>
+                    Open
+                  </Button>,
+                  <Button size="small" onClick={() => openEdit(item)}>
+                    Edit
+                  </Button>,
+                  <Button
+                    size="small"
+                    danger
+                    onClick={() => deleteHome(item.id)}
+                  >
                     Delete
                   </Button>,
                 ]}
@@ -170,7 +195,6 @@ const Home = ({ visible, isGrid, menuItems, setMenuItems }) => {
                     <Button size="small" onClick={() => handleAddMenu(item)}>
                       Open
                     </Button>
-                    ,
                     <Button size="small" onClick={() => openEdit(item)}>
                       Edit
                     </Button>

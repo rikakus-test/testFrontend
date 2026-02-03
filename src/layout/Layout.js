@@ -34,7 +34,14 @@ export default function AntdLayoutPage(props) {
   };
   const userMenu = (toggleView) => (
     <Menu>
-      <Menu.Item key="1">Profile</Menu.Item>
+      <Menu.Item
+        key="1"
+        onClick={() => {
+          console.log(current);
+        }}
+      >
+        Profile
+      </Menu.Item>
       <Menu.Item
         key="2"
         onClick={() => {
@@ -86,23 +93,22 @@ export default function AntdLayoutPage(props) {
 
   // Handler hapus item
   const handleDelete = (key) => {
-    console.log(window.location.href);
-    console.log(current);
-
-    setMenuItems((prev) => prev.filter((item) => item.home_id !== key));
-    props.setMenuItems((prev) => prev.filter((item) => item.home_id !== key));
+    setMenuItems((prev) => prev.filter((item) => item.id !== key));
+    props.setMenuItems((prev) => prev.filter((item) => item.id !== key));
 
     if (current === `/${key}`) {
-      console.log("jalan");
-
       setCurrent("/home");
       navigate("/home");
     }
   };
+
   useEffect(() => {
     setMenuItems(props.menuItems);
-    console.log(props);
   }, [props]);
+
+  useEffect(() => {
+    setCurrent(window.location.pathname);
+  }, [window.location.pathname]);
 
   const renderMenuItems = () => (
     <>
@@ -113,21 +119,25 @@ export default function AntdLayoutPage(props) {
       ))}
 
       {menuItems.map((item) => (
-        <Menu.Item key={`/${item.home_id}`} icon={<HomeOutlined />}>
-          <span>{item.home_name}</span>
-          {!isMobile && (
-            <Button
-              type="link"
-              danger
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDelete(item.home_id);
-              }}
-            >
-              <CloseOutlined />
-            </Button>
-          )}
+        <Menu.Item key={`/${item.id}`} icon={<HomeOutlined />}>
+          <span>{item.name}</span>
+          <Button
+            type="link"
+            danger
+            size="small"
+            style={{
+              position: "absolute",
+              top: 5,
+              right: 0,
+              border: "white",
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDelete(item.id);
+            }}
+          >
+            <CloseOutlined />
+          </Button>
         </Menu.Item>
       ))}
     </>
@@ -175,7 +185,6 @@ export default function AntdLayoutPage(props) {
       </div>
     );
   };
-
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
