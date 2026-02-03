@@ -206,7 +206,7 @@ const HomeRelated = ({ visible, isGrid, menuItems, setMenuItems }) => {
               </Section>
 
               <Section title="Device">
-                {a?.devices.length ? (
+                {a?.devices?.length ? (
                   a.devices.map((a) => (
                     <>
                       <div
